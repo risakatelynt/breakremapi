@@ -1,0 +1,32 @@
+from django.urls import path
+from django.conf.urls import include
+# from rest_framework import routers
+# from .views import UserViewSet
+from . import views
+
+# router = routers.DefaultRouter()
+# router.register('users', UserViewSet)
+
+urlpatterns = [
+    #     path("", include(router.urls)),
+
+    path('register/', views.UserViewSet.register_user, name='register'),
+    path('login/', views.UserViewSet.login_user, name='login'),
+    path('logout/', views.UserViewSet.logout_user, name='logout'),
+    path('userprofile/add/', views.FileUploadView.as_view(),
+         name='update-profile'),
+    path('userprofile/', views.UserProfileView.as_view(), name='profile'),
+    path('reminders/create/', views.RemindersViewSet.getReminders,
+         name="create-reminder"),
+    path('reminders/', views.RemindersViewSet.getReminders, name="reminders"),
+    path('reminders/<int:pk>/update/',
+         views.RemindersViewSet.getReminder, name="update-reminder"),
+    path('reminders/<int:pk>/delete/',
+         views.RemindersViewSet.getReminder, name="delete-reminder"),
+    path('reminders/delete/', views.RemindersViewSet.deleteReminders,
+         name='delete_all'),
+    path('theme/', views.ThemeViewSet.Themes, name='get-theme'),
+    path('theme/set/', views.ThemeViewSet.Themes, name='set-theme'),
+    path('settings/', views.SettingsViewSet.Settings, name='get-settings'),
+    path('settings/set/', views.SettingsViewSet.Settings, name='set-settings'),
+]

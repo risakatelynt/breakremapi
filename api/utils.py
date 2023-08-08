@@ -18,9 +18,9 @@ def register(request):
 
         # Check if username or email already exists
         if User.objects.filter(username=username).exists():
-            return JsonResponse({'resp': 'failed', 'message': 'Username already exists.'})
+            return JsonResponse({'resp': 'failed', 'message': 'Username already exists. Please enter a different username.'})
         if User.objects.filter(email=email).exists():
-            return JsonResponse({'resp': 'failed', 'message': 'Email ID already exists.'})
+            return JsonResponse({'resp': 'failed', 'message': 'Email ID already exists. Please enter a different email.'})
 
         # Create the user
         user = User.objects.create_user(
@@ -126,9 +126,9 @@ def updateReminder(request, pk):
             serializer.save()
             return JsonResponse({'resp': 'success'})
         else:
-            return JsonResponse({'resp': 'failed', 'message': 'Invalid data.', 'errors': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+            return JsonResponse({'resp': 'failed', 'message': 'Invalid data.', 'errors': serializer.errors})
     except ObjectDoesNotExist:
-        return JsonResponse({'resp': 'failed', 'message': 'Reminder not found.'}, status=status.HTTP_404_NOT_FOUND)
+        return JsonResponse({'resp': 'failed', 'message': 'Reminder not found.'})
     except Exception as e:
         return JsonResponse({'resp': 'error', 'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
@@ -140,7 +140,7 @@ def deleteReminder(request, pk):
         reminder.delete()
         return JsonResponse({'resp': 'success'})
     except ObjectDoesNotExist:
-        return JsonResponse({'resp': 'failed', 'message': 'Reminder not found.'}, status=status.HTTP_404_NOT_FOUND)
+        return JsonResponse({'resp': 'failed', 'message': 'Reminder not found.'})
     except Exception as e:
         return JsonResponse({'resp': 'error', 'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
@@ -157,7 +157,7 @@ def deleteReminders(request):
         else:
             return JsonResponse({'resp': 'failed', 'message': 'Reminder not found.'}, status=400)
     except ObjectDoesNotExist:
-        return JsonResponse({'resp': 'failed', 'message': 'Reminder not found.'}, status=status.HTTP_404_NOT_FOUND)
+        return JsonResponse({'resp': 'failed', 'message': 'Reminder not found.'})
     except Exception as e:
         return JsonResponse({'resp': 'error', 'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
@@ -191,7 +191,7 @@ def get_theme(request):
         # Return the theme preference as a JSON response
         return JsonResponse({'resp': 'success', 'theme': theme.theme_name})
     except Theme.DoesNotExist:
-        return JsonResponse({'resp': 'failed', 'message': 'Theme not found for the current user.'}, status=status.HTTP_404_NOT_FOUND)
+        return JsonResponse({'resp': 'failed', 'message': 'Theme not found for the current user.'})
     except Exception as e:
         return JsonResponse({'resp': 'error', 'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
@@ -223,6 +223,6 @@ def get_settings(request):
         # Return the theme preference as a JSON response
         return JsonResponse({'resp': 'success', 'data': serializer.data})
     except Theme.DoesNotExist:
-        return JsonResponse({'resp': 'failed', 'message': 'Setting not found for the current user.'}, status=status.HTTP_404_NOT_FOUND)
+        return JsonResponse({'resp': 'failed', 'message': 'Setting not found for the current user.'})
     except Exception as e:
         return JsonResponse({'resp': 'error', 'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

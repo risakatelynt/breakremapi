@@ -135,6 +135,76 @@ class FileUploadView(APIView):
             return Response({'resp': 'error', 'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
+class SetUserProfile(APIView):
+    def post(self, request, *args, **kwargs):
+        user = request.user
+        file_serializer = None  # Initialize file_serializer
+        try:
+            # Check if the new username or email already exists
+            new_username = request.data.get('username')
+            new_email = request.data.get('email')
+
+            existing_username = User.objects.filter(
+                username=new_username).exclude(pk=user.pk).exists()
+            existing_email = User.objects.filter(
+                email=new_email).exclude(pk=user.pk).exists()
+
+            if existing_username:
+                return Response({'resp': 'failed', 'message': 'Username already exists. Please enter a different username.'})
+
+            if existing_email:
+                return Response({'resp': 'failed', 'message': 'Email already exists. Please enter a different email.'})
+
+            user_profile = UserProfile.objects.get(user=user)
+            user_profile.save()
+            file_serializer = UserProfileSerializer(user_profile)
+
+            if file_serializer:
+
+                # Update User model fields (username and email)
+                user.username = request.data['username']
+                user.email = request.data['email']
+                user.save()
+
+                return Response({'resp': 'success', 'message': 'Updated succesfully.'})
+            else:
+                return Response({'resp': 'failed', 'message': 'Update failed.'})
+
+        except UserProfile.DoesNotExist:
+            try:
+                # Check if the new username or email already exists
+                new_username = request.data.get('username')
+                new_email = request.data.get('email')
+
+                existing_username = User.objects.filter(
+                    username=new_username).exclude(pk=user.pk).exists()
+                existing_email = User.objects.filter(
+                    email=new_email).exclude(pk=user.pk).exists()
+
+                if existing_username:
+                    return Response({'resp': 'failed', 'message': 'Username already exists. Please enter a different username.'})
+
+                if existing_email:
+                    return Response({'resp': 'failed', 'message': 'Email already exists. Please enter a different email.'})
+
+                # If the user profile does not exist, create a new one
+                file_serializer = UserProfileSerializer(
+                    data=request.data, context={'user': user})
+
+                if file_serializer.is_valid():
+                    file_serializer.save()
+
+                    # Update User model fields (username and email)
+                    user.username = request.data['username']
+                    user.email = request.data['email']
+                    user.save()
+                    return Response({'resp': 'success', 'message': 'Updated succesfully.'})
+                else:
+                    return Response({'resp': 'failed', 'message': 'Update failed.'})
+            except Exception as e:
+                return Response({'resp': 'error', 'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
 class UserProfileView(APIView):
     def get(self, request, *args, **kwargs):
         try:
@@ -152,7 +222,7 @@ class UserProfileView(APIView):
             return Response({'resp': 'success', 'data': {'username': user.username,
                                                          'email': user.email, 'profile_picture': serializer.data['profile_picture']}})
         except UserProfile.DoesNotExist:
-            return Response({'resp': 'failed', 'message': 'No profile found for the current user.'}, status=status.HTTP_404_NOT_FOUND)
+            return Response({'resp': 'failed', 'message': 'No profile found for the current user.'})
         except Exception as e:
             return Response({'resp': 'error', 'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 

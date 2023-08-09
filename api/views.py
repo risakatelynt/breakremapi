@@ -13,8 +13,6 @@ from django.conf import settings
 from .utils import register, user_login, user_logout, getRemindersList, createReminder, updateReminder, deleteReminder, deleteReminders, set_theme, get_theme, set_settings, get_settings
 
 
-# Create your views here.
-
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
@@ -38,8 +36,6 @@ class UserViewSet(viewsets.ModelViewSet):
 class RemindersViewSet(viewsets.ModelViewSet):
     queryset = Reminder.objects.all()
     serializer_class = ReminderSerializer
-    # authentication_classes = [TokenAuthentication]
-    # permission_classes = [IsAuthenticated]
 
     @api_view(['GET', 'POST'])
     def getReminders(request):
@@ -51,9 +47,6 @@ class RemindersViewSet(viewsets.ModelViewSet):
 
     @api_view(['PUT', 'DELETE'])
     def getReminder(request, pk):
-        # if request.method == 'GET':
-        #     return getReminderDetail(request, pk)
-
         if request.method == 'PUT':
             return updateReminder(request, pk)
 
@@ -69,8 +62,6 @@ class RemindersViewSet(viewsets.ModelViewSet):
 class ThemeViewSet(viewsets.ModelViewSet):
     queryset = Theme.objects.all()
     serializer_class = ThemeSerializer
-    # authentication_classes = [TokenAuthentication]
-    # permission_classes = [IsAuthenticated]
 
     @api_view(['GET', 'POST'])
     def Themes(request):
@@ -86,7 +77,7 @@ class FileUploadView(APIView):
 
     def post(self, request, *args, **kwargs):
         user = request.user
-        file_serializer = None  # Initialize file_serializer
+        file_serializer = None
         try:
             user_profile = UserProfile.objects.get(user=user)
 
@@ -99,18 +90,15 @@ class FileUploadView(APIView):
             # If the user profile already exists, update the profile_picture
             user_profile.profile_picture = request.data['profile_picture']
             user_profile.save()
-
-            # Update User model fields (username and email)
             user.username = request.data['username']
             user.email = request.data['email']
             user.save()
 
             file_serializer = UserProfileSerializer(user_profile)
-            # Pass the full URL for the profile_picture field to the frontend
             file_serializer.data['profile_picture'] = request.build_absolute_uri(
                 user_profile.profile_picture.url)
             if file_serializer:
-                return Response({'resp': 'success', 'message': 'Image uploaded succesfully.', 'data': file_serializer.data['profile_picture']}, status=status.HTTP_201_CREATED)
+                return Response({'resp': 'success', 'message': 'Image uploaded successfully.', 'data': file_serializer.data['profile_picture']}, status=status.HTTP_201_CREATED)
             else:
                 return Response({'resp': 'failed', 'message': 'Image upload failed.'}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -122,13 +110,11 @@ class FileUploadView(APIView):
 
             if file_serializer.is_valid():
                 file_serializer.save()
-
-                # Update User model fields (username and email)
                 user.username = request.data['username']
                 user.email = request.data['email']
                 user.save()
 
-                return Response({'resp': 'success', 'message': 'Image uploaded succesfully.', 'data': file_serializer.data['profile_picture']}, status=status.HTTP_201_CREATED)
+                return Response({'resp': 'success', 'message': 'Image uploaded successfully.', 'data': file_serializer.data['profile_picture']}, status=status.HTTP_201_CREATED)
             else:
                 return Response({'resp': 'failed', 'message': 'Image upload failed.'}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
@@ -138,7 +124,7 @@ class FileUploadView(APIView):
 class SetUserProfile(APIView):
     def post(self, request, *args, **kwargs):
         user = request.user
-        file_serializer = None  # Initialize file_serializer
+        file_serializer = None
         try:
             # Check if the new username or email already exists
             new_username = request.data.get('username')
@@ -160,13 +146,11 @@ class SetUserProfile(APIView):
             file_serializer = UserProfileSerializer(user_profile)
 
             if file_serializer:
-
-                # Update User model fields (username and email)
                 user.username = request.data['username']
                 user.email = request.data['email']
                 user.save()
 
-                return Response({'resp': 'success', 'message': 'Updated succesfully.'})
+                return Response({'resp': 'success', 'message': 'Updated successfully.'})
             else:
                 return Response({'resp': 'failed', 'message': 'Update failed.'})
 
@@ -193,12 +177,10 @@ class SetUserProfile(APIView):
 
                 if file_serializer.is_valid():
                     file_serializer.save()
-
-                    # Update User model fields (username and email)
                     user.username = request.data['username']
                     user.email = request.data['email']
                     user.save()
-                    return Response({'resp': 'success', 'message': 'Updated succesfully.'})
+                    return Response({'resp': 'success', 'message': 'Updated successfully.'})
                 else:
                     return Response({'resp': 'failed', 'message': 'Update failed.'})
             except Exception as e:
@@ -212,11 +194,9 @@ class UserProfileView(APIView):
             user_profile = UserProfile.objects.get(user=user)
             serializer = UserProfileSerializer(user_profile)
             if user_profile.profile_picture:
-                # Pass the full URL for the profile_picture field to the frontend
                 serializer.data['profile_picture'] = request.build_absolute_uri(
                     user_profile.profile_picture.url)
             else:
-                # If there is no profile_picture, send a custom message to the frontend
                 serializer.data['profile_picture'] = None
 
             return Response({'resp': 'success', 'data': {'username': user.username,
@@ -230,8 +210,6 @@ class UserProfileView(APIView):
 class SettingsViewSet(viewsets.ModelViewSet):
     queryset = Setting.objects.all()
     serializer_class = SettingSerializer
-    # authentication_classes = [TokenAuthentication]
-    # permission_classes = [IsAuthenticated]
 
     @api_view(['GET', 'POST'])
     def Settings(request):
